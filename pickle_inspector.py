@@ -1,4 +1,5 @@
 import pickle as python_pickle
+from types import ModuleType
 
 class Stub:
     def __setstate__(*_): pass
