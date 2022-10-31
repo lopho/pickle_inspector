@@ -4,7 +4,7 @@ Check what is in the pickle before eating it.
 ```py
 import torch
 import pickle_inspector
-torch.load('sus.pt', pickle_module=inspector_pickle.pickle)
+torch.load('sus.pt', pickle_module=pickle_inspector.pickle)
 ```
 Outputs:
 ```
