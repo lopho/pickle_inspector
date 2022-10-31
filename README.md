@@ -1,4 +1,4 @@
-# pickle_inspector
+# pickle_inspector 🥒🔬
 Check what is in the pickle before eating it.
 
 ```py
