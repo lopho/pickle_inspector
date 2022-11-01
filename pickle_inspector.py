@@ -41,7 +41,7 @@ class StubBase:
             result.calls.append(f'{self.full_name}({args}, {kwargs})')
 
     def __repr__(self):
-        return f'{self.full_namme}({self.args["__init__"]}, {self.kwargs["__init__"]})'
+        return f'{self.full_name}({self.args["__init__"]}, {self.kwargs["__init__"]})'
         
     def __getattr__(self, attr):
         return partial(self._call_tracer, attr)
