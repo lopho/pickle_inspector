@@ -20,9 +20,9 @@ class InspectorResult:
 
 class UnpickleConfig:
     def __init__(self, blacklist = [], whitelist = [], tracklist = []):
-        self.blacklist = []
-        self.whitelist = []
-        self.tracklist = []
+        self.blacklist = blacklist
+        self.whitelist = whitelist
+        self.tracklist = tracklist
         self.record = True
         self.verbose = False
         self.strict = False
@@ -33,17 +33,15 @@ class StubBase:
         self.module = module
         self.name = name
         self.full_name = f'{module}.{name}'
-        self.args = {}
-        self.kwargs = {}
-        self.args['__init__'] = args
-        self.kwargs['__init__'] = kwargs
+        self.args = {'__init__': args}
+        self.kwargs = {'__init__': kwargs}
         self.config = config
         self.result = result
         if config.record or self.full_name in config.tracklist:
             result.calls.append(f'{self.full_name}({args}, {kwargs})')
 
     def __repr__(self):
-        return f'{self.module}.{self.name}({self.args["__init__"]}, {self.kwargs["__init__"]})'
+        return f'{self.full_namme}({self.args["__init__"]}, {self.kwargs["__init__"]})'
         
     def __getattr__(self, attr):
         return partial(self._call_tracer, attr)
