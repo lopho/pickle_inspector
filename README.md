@@ -5,6 +5,8 @@ Check what is in the pickle before eating it.
 import torch
 import pickle_inspector
 result = torch.load('sus.pt', pickle_module=pickle_inspector.pickle)
+for c in result.classes:
+    print(c)
 ```
 notice calls to `shutil.rmtree`, `os.system` or similar
 ```
