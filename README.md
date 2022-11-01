@@ -6,7 +6,7 @@ import torch
 import pickle_inspector
 result = torch.load('sus.pt', pickle_module=pickle_inspector.pickle)
 ```
-notice calls to ```shutil.rmtree```, ```os.system``` or similar
+notice calls to `shutil.rmtree`, `os.system` or similar
 ```
 > shutil.rmtree
 > torch._utils._rebuild_tensor_v2
