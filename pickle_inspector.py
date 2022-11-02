@@ -33,8 +33,8 @@ class StubBase:
         self.module = module
         self.name = name
         self.full_name = f'{module}.{name}'
-        self.args = {'__init__': args}
-        self.kwargs = {'__init__': kwargs}
+        self.args = {'__init__': [args]}
+        self.kwargs = {'__init__': [kwargs]}
         self.config = config
         self.result = result
         if config.record or self.full_name in config.tracklist:
@@ -45,6 +45,9 @@ class StubBase:
         
     def __getattr__(self, attr):
         return partial(self._call_tracer, attr)
+
+    def __setitem__(self,*args, **kwargs):
+        self._call_tracer(self, '__setitem__', *args, **kwargs)
 
     def _call_tracer(self, attr, *args, **kwargs):
         if attr not in self.args:
