@@ -36,3 +36,5 @@ and it seems like someone tried to delete something and ransom a file
 > _codecs.encode(('ñhã\x88µøÔ>', 'latin1'), {})
 > numpy.core.multiarray.scalar((numpy.dtype(('f8', False, True), {}), _codecs.encode(('ñhã\x88µøÔ>', 'latin1'), {})), {})
 ```
+
+tested with python 3.9
