@@ -86,13 +86,21 @@ class UnpickleInspector(UnpickleBase):
         return result
 
 
+class BlockedException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+
 class UnpickleControlled(UnpickleBase):
     def find_class(self, result, module, name):
         full_name = f'{module}.{name}'
         in_blacklist = _check_list(full_name, self.config.blacklist)
         in_whitelist = _check_list(full_name, self.config.whitelist)
         if (in_blacklist and not in_whitelist) or (len(self.config.blacklist) < 1 and len(self.config.whitelist) > 0 and not in_whitelist):
-            return UnpickleInspector.find_class(self, result, module, name)
+            if self.config.strict:
+                raise lockedException(f'strict mode: {full_name} blocked')
+            else:
+                return UnpickleInspector.find_class(self, result, module, name)
         self._print(full_name)
         in_tracklist = _check_list(full_name, self.config.tracklist)
         if self.config.record or full_name in self.config.tracklist:
