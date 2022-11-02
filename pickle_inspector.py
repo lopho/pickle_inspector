@@ -47,7 +47,7 @@ class StubBase:
         return partial(self._call_tracer, attr)
 
     def __setitem__(self,*args, **kwargs):
-        self._call_tracer(self, '__setitem__', *args, **kwargs)
+        self._call_tracer('__setitem__', *args, **kwargs)
 
     def _call_tracer(self, attr, *args, **kwargs):
         if attr not in self.args:
