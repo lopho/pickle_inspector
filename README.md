@@ -1,6 +1,10 @@
 # pickle_inspector 🥒🔬
 Check what is in the pickle before eating it.
 
+NOTE:
+torch == 1.13.0 breaks using custom unpicklers, see https://github.com/pytorch/pytorch/issues/88438
+until this is fixed, stick to 1.12.x or older.
+
 ```py
 import torch
 import pickle_inspector
@@ -37,4 +41,4 @@ and it seems like someone tried to delete something and ransom a file
 > numpy.core.multiarray.scalar((numpy.dtype(('f8', False, True), {}), _codecs.encode(('ñhã\x88µøÔ>', 'latin1'), {})), {})
 ```
 
-tested with python 3.9
+tested with python 3.9 and torch 1.12
