@@ -1,4 +1,4 @@
-
+# (c) 2022 lopho
 import pickle as python_pickle
 from types import ModuleType
 from functools import partial
@@ -19,35 +19,22 @@ class InspectorResult:
 
 
 class UnpickleConfig:
-    def __init__(self, blacklist = [], whitelist = [], tracklist = []):
+    def __init__(self, blacklist = [], whitelist = []):
         self.blacklist = blacklist
         self.whitelist = whitelist
-        self.tracklist = tracklist
-        self.record = True
-        self.verbose = False
+        self.verbose = True
         self.strict = False
 
 
-class StubBase:
-    def __init__(self, module, name, result, config, *args, **kwargs):
+class StubMeta:
+    def __init__(self, module, name, result, config):
         self.module = module
         self.name = name
         self.full_name = f'{module}.{name}'
-        self.args = {'__init__': [args]}
-        self.kwargs = {'__init__': [kwargs]}
+        self.args = {}
+        self.kwargs = {}
         self.config = config
         self.result = result
-        if config.record or self.full_name in config.tracklist:
-            result.calls.append(f'{self.full_name}({args}, {kwargs})')
-
-    def __repr__(self):
-        return f'{self.full_name}({self.args["__init__"]}, {self.kwargs["__init__"]})'
-        
-    def __getattr__(self, attr):
-        return partial(self._call_tracer, attr)
-
-    def __setitem__(self,*args, **kwargs):
-        self._call_tracer('__setitem__', *args, **kwargs)
 
     def _call_tracer(self, attr, *args, **kwargs):
         if attr not in self.args:
@@ -56,6 +43,22 @@ class StubBase:
         self.args[attr].append(args)
         self.kwargs[attr].append(kwargs)
         self.result.calls.append(f'{self.full_name}.{attr}({args}, {kwargs})')
+
+    def __repr__(self):
+        if '__call__' in self.args and len(self.args['__call__']) > 0:
+            return f'{self.full_name}({self.args["__call__"][0]}, {self.kwargs["__call__"][0]})'
+        else:
+            return f'{self.full_name}()'
+
+    def __call__(self, *args, **kwargs):
+        self._call_tracer('__call__', *args, **kwargs)
+        return self
+
+    def __getattr__(self, attr):
+        return partial(self._call_tracer, attr)
+
+    def __setitem__(self, *args, **kwargs):
+        self._call_tracer('__setitem__', *args, **kwargs)
 
 
 class UnpickleBase(python_pickle.Unpickler):
@@ -69,14 +72,9 @@ class UnpickleInspector(UnpickleBase):
     def find_class(self, result, module, name):
         full_name = f'{module}.{name}'
         self._print(f'STUBBED {full_name}')
-        in_tracklist = _check_list(full_name, self.config.tracklist)
-        if self.config.record or in_tracklist:
-           result.classes.append(full_name)
+        result.classes.append(full_name)
         config = self.config
-        class Stub(StubBase):
-            def __init__(self, *args, **kwargs):
-                super().__init__(module, name, result, config, *args, **kwargs)
-        return Stub
+        return StubMeta(module, name, result, config)
 
     def load(self):
         result = InspectorResult()
@@ -102,29 +100,21 @@ class UnpickleControlled(UnpickleBase):
             else:
                 return UnpickleInspector.find_class(self, result, module, name)
         self._print(full_name)
-        in_tracklist = _check_list(full_name, self.config.tracklist)
-        if self.config.record or full_name in self.config.tracklist:
-            result.classes.append(full_name)
+        result.classes.append(full_name)
         return super().find_class(module, name)
-        
+
     def load(self):
         result = InspectorResult()
         self.find_class = partial(UnpickleControlled.find_class, self, result)
         result.structure = super().load()
         return result
 
-
-def build(unpickler, conf = None):
-    if conf is not None:
+class PickleModule(ModuleType):
+    def __init__(self, unpickler, conf = UnpickleConfig()):
+        super().__init__('pickle')
         class ConfiguredUnpickler(unpickler):
             config = conf
-        unpickler = ConfiguredUnpickler
-            
-    class PickleModule(ModuleType):
-        Unpickler = unpickler
-    
-    return PickleModule('pickle')
+        self.Unpickler = ConfiguredUnpickler
 
-
-pickle = build(UnpickleInspector)
+inspector = PickleModule(UnpickleInspector)
 
