@@ -1,10 +1,33 @@
 # pickle_inspector 🥒🔬
 Check what is in the pickle before eating it.
 
+It works on any type of pickle, but was made with `torch` in mind.
+
 NOTE:
 torch == 1.13.0 breaks using custom unpicklers, see https://github.com/pytorch/pytorch/issues/88438
 until this is fixed, stick to 1.12.x or older.
 
+## Scanning pickles via command line
+**tl;dr** just let me scan my pickles.
+```sh
+python3 scan_pickle.py --preset stable_diffusion_v1 sus.ckpt
+```
+### Script usage
+```
+usage: Scan pickles [-h] [-p PRESET] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]] checkpoint
+
+positional arguments:
+  checkpoint            path to a torch pickle
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -p PRESET, --preset PRESET
+                        a whitelist preset to use: stable_diffusion_v1
+  -w WHITELIST [WHITELIST ...], --whitelist WHITELIST [WHITELIST ...]
+                        whitelist of modules and functions to allow
+  -b BLACKLIST [BLACKLIST ...], --blacklist BLACKLIST [BLACKLIST ...]
+                        blacklist of modules and functions to block
+```
 ## Inspecting
 Inspect without unpickling.
 ```py
@@ -96,5 +119,16 @@ conf.whitelist = ['torch.FloatStorage']
 
 If the blacklist is empty and the whitelist contains items, \
 everything except items in the whitelist will be blocked.
+
+## Safe whitelist for stable diffusion v1
+A premade whitelist for stable diffusion v1 is available in this project.
+
+Example: Scan a stable diffusion checkpoint
+```py
+import torch
+from pickle_inspector import UnpickleConfig, PickleModule, UnpickleInspector, whitelists
+conf = UnpickleConfig(whitelist = whitelists.stable_diffusion_v1)
+torch.load('sd-v1-4.ckpt', pickle_module=PickleModule(UnpickleInspector, conf))
+```
 
 Tested with python 3.9 and torch 1.12.1

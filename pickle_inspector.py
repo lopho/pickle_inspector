@@ -2,7 +2,7 @@
 import pickle as python_pickle
 from types import ModuleType
 from functools import partial
-
+import whitelists
 
 def _check_list(what, where):
     for s in where:
@@ -19,11 +19,15 @@ class InspectorResult:
 
 
 class UnpickleConfig:
-    def __init__(self, blacklist = [], whitelist = []):
+    def __init__(
+            self, blacklist = [],
+            whitelist = [],
+            verbose = True,
+            strict = False):
         self.blacklist = blacklist
         self.whitelist = whitelist
-        self.verbose = True
-        self.strict = False
+        self.verbose = verbose
+        self.strict = strict
 
 
 class StubMeta:
@@ -71,9 +75,14 @@ class UnpickleBase(python_pickle.Unpickler):
 class UnpickleInspector(UnpickleBase):
     def find_class(self, result, module, name):
         full_name = f'{module}.{name}'
-        self._print(f'STUBBED {full_name}')
+        self._print(f'stub: {full_name}')
         result.classes.append(full_name)
         config = self.config
+        if self.config.strict:
+            in_blacklist = _check_list(full_name, self.config.blacklist)
+            in_whitelist = _check_list(full_name, self.config.whitelist)
+            if (in_blacklist and not in_whitelist) or (len(self.config.blacklist) < 1 and len(self.config.whitelist) > 0 and not in_whitelist):
+                raise BlockedException(full_name)
         return StubMeta(module, name, result, config)
 
     def load(self):
@@ -86,7 +95,7 @@ class UnpickleInspector(UnpickleBase):
 
 class BlockedException(Exception):
     def __init__(self, msg):
-        self.msg = msg
+        super().__init__(f'BLOCKED: {msg}')
 
 
 class UnpickleControlled(UnpickleBase):
@@ -96,7 +105,7 @@ class UnpickleControlled(UnpickleBase):
         in_whitelist = _check_list(full_name, self.config.whitelist)
         if (in_blacklist and not in_whitelist) or (len(self.config.blacklist) < 1 and len(self.config.whitelist) > 0 and not in_whitelist):
             if self.config.strict:
-                raise BlockedException(f'strict mode: {full_name} blocked')
+                raise BlockedException(full_name)
             else:
                 return UnpickleInspector.find_class(self, result, module, name)
         self._print(full_name)
@@ -109,12 +118,14 @@ class UnpickleControlled(UnpickleBase):
         result.structure = super().load()
         return result
 
+
 class PickleModule(ModuleType):
     def __init__(self, unpickler, conf = UnpickleConfig()):
         super().__init__('pickle')
         class ConfiguredUnpickler(unpickler):
             config = conf
         self.Unpickler = ConfiguredUnpickler
+
 
 inspector = PickleModule(UnpickleInspector)
 
