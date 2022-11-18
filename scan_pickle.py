@@ -1,7 +1,4 @@
 # (c) 2022 lopho
-import sys
-from argparse import ArgumentParser
-import torch
 from pickle_inspector import (
         UnpickleConfig,
         UnpickleInspector,
@@ -11,6 +8,7 @@ from pickle_inspector import (
 )
 
 def main(args):
+    from argparse import ArgumentParser
     parser = ArgumentParser("Scan pickles")
     parser.add_argument(
         '-c', '--ckpt',
@@ -36,7 +34,6 @@ def main(args):
         help = "blacklist of modules and functions to block"
     )
     args = parser.parse_args(args)
-    print(args)
     whitelist = []
     blacklist = []
     if args.preset is not None:
@@ -45,6 +42,11 @@ def main(args):
         whitelist += args.whitelist
     if args.blacklist is not None:
         blacklist += args.blacklist
+    print(f"Using checkpoint: {args.ckpt}")
+    if len(whitelist) > 0:
+        print(f"Using white list: {whitelist}")
+    if len(blacklist) > 0:
+        print(f"Using black list: {blacklist}")
     conf = UnpickleConfig(
         strict = True,
         verbose = True,
@@ -52,6 +54,11 @@ def main(args):
         blacklist = blacklist
     )
     pickle = PickleModule(UnpickleInspector, conf)
+    import torch
+    if torch.__version__.startswith('1.13.0'):
+        print("WARNING: torch == 1.13.0 is not supported")
+        print("Please install torch 1.12.1, 1.13.1 or later")
+        return False
     passed = True
     try:
         torch.load(args.ckpt, pickle_module = pickle)
@@ -62,5 +69,6 @@ def main(args):
     return passed
 
 if __name__ == '__main__':
+    import sys
     sys.exit(0) if main(sys.argv[1:]) else sys.exit(1)
 
