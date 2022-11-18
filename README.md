@@ -10,17 +10,15 @@ until this is fixed, stick to 1.12.x or older.
 ## Scanning pickles via command line
 **tl;dr** just let me scan my pickles.
 ```sh
-python3 scan_pickle.py --preset stable_diffusion_v1 sus.ckpt
+python3 scan_pickle.py --preset stable_diffusion_v1 --ckpt sus.ckpt
 ```
 ### Script usage
 ```
-usage: Scan pickles [-h] [-p PRESET] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]] checkpoint
-
-positional arguments:
-  checkpoint            path to a torch pickle
+usage: Scan pickles [-h] -c CKPT [-p PRESET] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
 
 optional arguments:
   -h, --help            show this help message and exit
+  -c CKPT, --ckpt CKPT  path to a torch pickle
   -p PRESET, --preset PRESET
                         a whitelist preset to use: stable_diffusion_v1
   -w WHITELIST [WHITELIST ...], --whitelist WHITELIST [WHITELIST ...]
