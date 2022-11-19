@@ -12,6 +12,36 @@ from pickle_inspector import (
 )
 
 
+def scan(path, pickle_module):
+    print(f"Reading {path}")
+    data = dict()
+    if zipfile.is_zipfile(path):
+        zf = zipfile.ZipFile(path)
+        for f in zf.filelist:
+            d = io.BytesIO(zf.read(f))
+            if is_pickle(d):
+                print(f"Found pickle in zip: {f.filename}")
+                data[f.filename] = d
+    else:
+        with open(path, 'rb') as f:
+            if is_pickle(f):
+                data = { path: io.BytesIO(f.read()) }
+    passed = True
+    if len(data) < 1:
+        print("No valid pickle found!")
+        passed = False
+    else:
+        for k in data:
+            print(f"Scanning: {k}")
+            try:
+                pickle_module.Unpickler(data[k]).load()
+            except BlockedException as e:
+                print(e)
+                passed = False
+    print("Scan for", path, "PASSED ✅" if passed else "FAILED! ⚠️")
+    return passed
+
+
 def main(args):
     from argparse import ArgumentParser
     from functools import partial
@@ -20,8 +50,9 @@ def main(args):
         '-i', '--in',
         type = str,
         required = True,
+        nargs = '+',
         dest = 'input',
-        help = "path to a pickle or a zip containing pickles"
+        help = "path to a pickle(s) or zip(s) containing pickles"
     )
     parser.add_argument(
         '-p', '--preset',
@@ -56,7 +87,7 @@ def main(args):
         whitelist += args.whitelist
     if args.blacklist is not None:
         blacklist += args.blacklist
-    print(f"Scanning file: {args.input}")
+    print(f"Scanning file(s): {args.input}")
     if len(whitelist) > 0:
         print(f"Using white list: {whitelist}")
     if len(blacklist) > 0:
@@ -68,23 +99,11 @@ def main(args):
         blacklist = blacklist
     )
     stubPickle = PickleModule(UnpickleInspector, conf)
-    data = dict()
-    if zipfile.is_zipfile(args.input):
-        zf = zipfile.ZipFile(args.input)
-        for f in zf.filelist:
-            data[f.filename] = io.BytesIO(zf.read(f))
-    else:
-        with open(args.input, 'rb') as f:
-            data = { args.input: io.BytesIO(f.read()) }
     passed = True
-    for k in [ k for k in data if is_pickle(data[k]) ]:
-        data[k].seek(0)
-        try:
-            stubPickle.Unpickler(data[k]).load()
-        except BlockedException as e:
-            print(e)
+    for p in args.input:
+        if not scan(p, stubPickle):
             passed = False
-    print("Scan", "PASSED ✅" if passed else "FAILED! ⚠️")
+    return passed
 
 
 if __name__ == '__main__':

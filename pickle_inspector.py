@@ -13,21 +13,27 @@ def _check_list(what, where):
             return True
     return False
 
-
 def is_pickle(bytes_like):
     bytes_like.seek(0)
+    ret = _is_pickle(bytes_like)
+    bytes_like.seek(0)
+    return ret
+
+def _is_pickle(bytes_like):
     ops = pickletools.genops(bytes_like.read())
     opcodes = []
     try:
-        for o in ops:
+        for i,o in enumerate(ops):
             if len(o) < 1:
                 continue
+            if i == 0 and o[0].name != 'PROTO':
+                return False
             opcodes.append(o[0])
     except ValueError:
         return False
     if len(opcodes) < 1:
         return False
-    if opcodes[0].name == 'PROTO' and opcodes[-1].name == 'STOP':
+    if opcodes[-1].name == 'STOP':
         return True
     return False
 
@@ -96,7 +102,7 @@ class UnpickleBase(python_pickle.Unpickler):
 class UnpickleInspector(UnpickleBase):
     def find_class(self, result, module, name):
         full_name = f'{module}.{name}'
-        self._print(f'stub: {full_name}')
+        self._print(f'found: {full_name}')
         result.classes.append(full_name)
         config = self.config
         if self.config.strict:

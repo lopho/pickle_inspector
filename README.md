@@ -13,26 +13,30 @@ until this is fixed, stick to 1.12.x or older.
 python3 scan_pickle.py --preset stable_diffusion_v1 --in sus.ckpt
 ```
 ```
-> Scanning file: sus.ckpt
-> Using white list: ['collections.OrderedDict', 'torch._utils._rebuild_tensor_v2', 'torch.HalfStorage', 'torch.> FloatStorage', 'torch.IntStorage', 'torch.LongStorage', 'pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint', 'numpy.core.multiarray.scalar', 'numpy.dtype', '_codecs.encode']
-> stub: torch._utils._rebuild_tensor_v2
-> stub: torch.FloatStorage
-> stub: collections.OrderedDict
-> stub: torch.IntStorage
-> stub: torch.LongStorage
-> stub: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
-> stub: numpy.core.multiarray.scalar
-> stub: numpy.dtype
-> stub: _codecs.encode
-> Scan PASSED ✅
+> Scanning file(s): ['sus.ckpt']
+> Using white list: ['collections.OrderedDict', 'torch._utils._rebuild_tensor_v2', 'torch.HalfStorage', 'torch.FloatStorage', 'torch.IntStorage', 'torch.LongStorage', 'pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint', 'numpy.core.multiarray.scalar', 'numpy.dtype', '_codecs.encode']
+> Reading sus.ckpt
+> Found pickle in zip: archive/data.pkl
+> Scanning: archive/data.pkl
+> found: torch._utils._rebuild_tensor_v2
+> found: torch.FloatStorage
+> found: collections.OrderedDict
+> found: torch.IntStorage
+> found: torch.LongStorage
+> found: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+> found: numpy.core.multiarray.scalar
+> found: numpy.dtype
+> found: _codecs.encode
+> Scan for sus.ckpt PASSED ✅
 ```
 ### Script usage
 ```
-usage: Scan pickles [-h] -i INPUT [-p {stable_diffusion_v1}] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
+usage: Scan pickles [-h] -i INPUT [INPUT ...] [-p {stable_diffusion_v1}] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -i INPUT, --in INPUT  path to a pickle or a zip containing pickles
+  -i INPUT [INPUT ...], --in INPUT [INPUT ...]
+                        path to a pickle(s) or zip(s) containing pickles
   -p {stable_diffusion_v1}, --preset {stable_diffusion_v1}
                         a whitelist preset to use: stable_diffusion_v1
   -w WHITELIST [WHITELIST ...], --whitelist WHITELIST [WHITELIST ...]
