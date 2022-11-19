@@ -10,10 +10,10 @@ until this is fixed, stick to 1.12.x or older.
 ## Scanning pickles via command line
 **tl;dr** just let me scan my pickles.
 ```sh
-python3 scan_pickle.py --preset stable_diffusion_v1 --ckpt sus.ckpt
+python3 scan_pickle.py --preset stable_diffusion_v1 --in sus.ckpt
 ```
 ```
-> Using checkpoint: sus.ckpt
+> Scanning file: sus.ckpt
 > Using white list: ['collections.OrderedDict', 'torch._utils._rebuild_tensor_v2', 'torch.HalfStorage', 'torch.> FloatStorage', 'torch.IntStorage', 'torch.LongStorage', 'pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint', 'numpy.core.multiarray.scalar', 'numpy.dtype', '_codecs.encode']
 > stub: torch._utils._rebuild_tensor_v2
 > stub: torch.FloatStorage
@@ -28,12 +28,12 @@ python3 scan_pickle.py --preset stable_diffusion_v1 --ckpt sus.ckpt
 ```
 ### Script usage
 ```
-usage: Scan pickles [-h] -c CKPT [-p PRESET] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
+usage: Scan pickles [-h] -i INPUT [-p {stable_diffusion_v1}] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -c CKPT, --ckpt CKPT  path to a torch pickle
-  -p PRESET, --preset PRESET
+  -i INPUT, --in INPUT  path to a pickle or a zip containing pickles
+  -p {stable_diffusion_v1}, --preset {stable_diffusion_v1}
                         a whitelist preset to use: stable_diffusion_v1
   -w WHITELIST [WHITELIST ...], --whitelist WHITELIST [WHITELIST ...]
                         whitelist of modules and functions to allow

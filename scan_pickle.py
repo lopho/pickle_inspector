@@ -1,5 +1,9 @@
 # (c) 2022 lopho
+
+import io
+import zipfile
 from pickle_inspector import (
+        is_pickle,
         UnpickleConfig,
         UnpickleInspector,
         PickleModule,
@@ -7,15 +11,17 @@ from pickle_inspector import (
         whitelists
 )
 
+
 def main(args):
     from argparse import ArgumentParser
     from functools import partial
     parser = ArgumentParser("Scan pickles")
     parser.add_argument(
-        '-c', '--ckpt',
+        '-i', '--in',
         type = str,
         required = True,
-        help = "path to a torch pickle"
+        dest = 'input',
+        help = "path to a pickle or a zip containing pickles"
     )
     parser.add_argument(
         '-p', '--preset',
@@ -50,7 +56,7 @@ def main(args):
         whitelist += args.whitelist
     if args.blacklist is not None:
         blacklist += args.blacklist
-    print(f"Using checkpoint: {args.ckpt}")
+    print(f"Scanning file: {args.input}")
     if len(whitelist) > 0:
         print(f"Using white list: {whitelist}")
     if len(blacklist) > 0:
@@ -61,20 +67,25 @@ def main(args):
         whitelist = whitelist,
         blacklist = blacklist
     )
-    pickle = PickleModule(UnpickleInspector, conf)
-    import torch
-    if torch.__version__.startswith('1.13.0'):
-        print("WARNING: torch == 1.13.0 is not supported")
-        print("Please install torch 1.12.1, 1.13.1 or later")
-        return False
+    stubPickle = PickleModule(UnpickleInspector, conf)
+    data = dict()
+    if zipfile.is_zipfile(args.input):
+        zf = zipfile.ZipFile(args.input)
+        for f in zf.filelist:
+            data[f.filename] = io.BytesIO(zf.read(f))
+    else:
+        with open(args.input, 'rb') as f:
+            data = { args.input: io.BytesIO(f.read()) }
     passed = True
-    try:
-        torch.load(args.ckpt, pickle_module = pickle)
-    except BlockedException as e:
-        print(e)
-        passed = False
+    for k in [ k for k in data if is_pickle(data[k]) ]:
+        data[k].seek(0)
+        try:
+            stubPickle.Unpickler(data[k]).load()
+        except BlockedException as e:
+            print(e)
+            passed = False
     print("Scan", "PASSED ✅" if passed else "FAILED! ⚠️")
-    return passed
+
 
 if __name__ == '__main__':
     import sys

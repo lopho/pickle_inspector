@@ -1,13 +1,34 @@
 # (c) 2022 lopho
+
+import pickletools
 import pickle as python_pickle
 from types import ModuleType
 from functools import partial
 import whitelists
 
+
 def _check_list(what, where):
     for s in where:
         if s == what or (s.endswith('*') and what.startswith(s[:-1])):
             return True
+    return False
+
+
+def is_pickle(bytes_like):
+    bytes_like.seek(0)
+    ops = pickletools.genops(bytes_like.read())
+    opcodes = []
+    try:
+        for o in ops:
+            if len(o) < 1:
+                continue
+            opcodes.append(o[0])
+    except ValueError:
+        return False
+    if len(opcodes) < 1:
+        return False
+    if opcodes[0].name == 'PROTO' and opcodes[-1].name == 'STOP':
+        return True
     return False
 
 
