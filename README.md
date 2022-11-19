@@ -12,6 +12,20 @@ until this is fixed, stick to 1.12.x or older.
 ```sh
 python3 scan_pickle.py --preset stable_diffusion_v1 --ckpt sus.ckpt
 ```
+```
+> Using checkpoint: sus.ckpt
+> Using white list: ['collections.OrderedDict', 'torch._utils._rebuild_tensor_v2', 'torch.HalfStorage', 'torch.> FloatStorage', 'torch.IntStorage', 'torch.LongStorage', 'pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint', 'numpy.core.multiarray.scalar', 'numpy.dtype', '_codecs.encode']
+> stub: torch._utils._rebuild_tensor_v2
+> stub: torch.FloatStorage
+> stub: collections.OrderedDict
+> stub: torch.IntStorage
+> stub: torch.LongStorage
+> stub: pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint
+> stub: numpy.core.multiarray.scalar
+> stub: numpy.dtype
+> stub: _codecs.encode
+> Scan PASSED ✅
+```
 ### Script usage
 ```
 usage: Scan pickles [-h] -c CKPT [-p PRESET] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
