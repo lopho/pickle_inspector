@@ -9,6 +9,7 @@ from pickle_inspector import (
 
 def main(args):
     from argparse import ArgumentParser
+    from functools import partial
     parser = ArgumentParser("Scan pickles")
     parser.add_argument(
         '-c', '--ckpt',
@@ -19,6 +20,7 @@ def main(args):
     parser.add_argument(
         '-p', '--preset',
         type = str,
+        choices = whitelists.lists.keys(),
         help = "a whitelist preset to use: stable_diffusion_v1"
     )
     parser.add_argument(
@@ -33,6 +35,12 @@ def main(args):
         nargs = '+',
         help = "blacklist of modules and functions to block"
     )
+    def error(self, message):
+        import sys
+        sys.stderr.write(f"error: {message}\n")
+        self.print_help()
+        self.exit()
+    parser.error = partial(error, parser) # type: ignore
     args = parser.parse_args(args)
     whitelist = []
     blacklist = []
