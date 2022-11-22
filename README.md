@@ -142,8 +142,8 @@ A premade whitelist for stable diffusion v1 is available in this project.
 Example: Scan a stable diffusion checkpoint
 ```py
 import torch
-from pickle_inspector import UnpickleConfig, PickleModule, UnpickleInspector, whitelists
-conf = UnpickleConfig(whitelist = whitelists.stable_diffusion_v1)
+from pickle_inspector import UnpickleConfig, PickleModule, UnpickleInspector, importlists
+conf = UnpickleConfig(whitelist = importlists.stable_diffusion_v1)
 torch.load('sd-v1-4.ckpt', pickle_module=PickleModule(UnpickleInspector, conf))
 ```
 

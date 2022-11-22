@@ -15,5 +15,5 @@ stable_diffusion_v1 = [
 ]
 
 
-lists = { 'stable_diffusion_v1': stable_diffusion_v1 }
+whitelists = { 'stable_diffusion_v1': stable_diffusion_v1 }
 

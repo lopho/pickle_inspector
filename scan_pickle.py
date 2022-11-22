@@ -8,7 +8,7 @@ from pickle_inspector import (
         UnpickleInspector,
         PickleModule,
         BlockedException,
-        whitelists
+        importlists
 )
 
 
@@ -57,7 +57,7 @@ def main(args):
     parser.add_argument(
         '-p', '--preset',
         type = str,
-        choices = whitelists.lists.keys(),
+        choices = importlists.whitelists.keys(),
         help = "a whitelist preset to use: stable_diffusion_v1"
     )
     parser.add_argument(
@@ -82,7 +82,7 @@ def main(args):
     whitelist = []
     blacklist = []
     if args.preset is not None:
-        whitelist = whitelists.lists[args.preset]
+        whitelist = importlists.whitelists[args.preset]
     if args.whitelist is not None:
         whitelist += args.whitelist
     if args.blacklist is not None:

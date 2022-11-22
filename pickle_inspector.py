@@ -4,7 +4,7 @@ import pickletools
 import pickle as python_pickle
 from types import ModuleType
 from functools import partial
-import whitelists
+import importlists
 
 
 def _check_list(what, where):
