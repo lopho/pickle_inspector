@@ -148,3 +148,8 @@ torch.load('sd-v1-4.ckpt', pickle_module=PickleModule(UnpickleInspector, conf))
 ```
 
 Tested with python 3.9 and torch 1.12.1
+
+---
+
+Copyright (C) 2022  Lopho `<contact@lopho.org>`\
+Licensed under the AGPLv3 `<https://www.gnu.org/licenses/agpl-3.0.html>`
