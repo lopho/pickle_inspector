@@ -40,7 +40,7 @@ def _is_pickle(bytes_like):
 
 class InspectorResult:
     def __init__(self):
-        self.classes = []
+        self.imports = []
         self.calls = []
         self.structure = {}
 
@@ -106,7 +106,7 @@ class UnpickleInspector(UnpickleBase):
     def find_class(self, result, module, name):
         full_name = f'{module}.{name}'
         self._print(f'found: {full_name}')
-        result.classes.append(full_name)
+        result.imports.append(full_name)
         config = self.config
         if self.config.strict:
             in_blacklist = _check_list(full_name, self.config.blacklist)
@@ -139,7 +139,7 @@ class UnpickleControlled(UnpickleBase):
             else:
                 return UnpickleInspector.find_class(self, result, module, name)
         self._print('import:', full_name)
-        result.classes.append(full_name)
+        result.imports.append(full_name)
         if self.config.ignore_missing_imports:
             try:
                 super().find_class(module, name)

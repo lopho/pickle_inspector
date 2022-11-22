@@ -50,7 +50,7 @@ Inspect without unpickling.
 import torch
 import pickle_inspector
 result = torch.load('sus.pt', pickle_module=pickle_inspector.inspector)
-for c in result.classes:
+for c in result.imports:
     print(c)
 ```
 notice calls to `shutil.rmtree`, `os.system` or similar
@@ -102,7 +102,7 @@ config.whitelist = [
 ]
 result = torch.load('model.ckpt', pickle_module = PickleModule(UnpickleControlled, config))
 state_dict = result.structure
-for c in result.classes:
+for c in result.imports:
     print(c)
 ```
 ```
