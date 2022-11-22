@@ -109,7 +109,7 @@ for c in result.classes:
 > torch._utils._rebuild_tensor_v2
 > torch.FloatStorage
 ...
-> STUBBED __builtin__.eval
+> __builtin__.eval
 > collections.OrderedDict
 ...
 ```

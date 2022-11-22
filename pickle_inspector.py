@@ -50,11 +50,14 @@ class UnpickleConfig:
             self, blacklist = [],
             whitelist = [],
             verbose = True,
-            strict = False):
+            strict = False,
+            ignore_missing_imports = False
+    ):
         self.blacklist = blacklist
         self.whitelist = whitelist
         self.verbose = verbose
         self.strict = strict
+        self.ignore_missing_imports = ignore_missing_imports
 
 
 class StubMeta:
@@ -114,8 +117,8 @@ class UnpickleInspector(UnpickleBase):
 
     def load(self):
         result = InspectorResult()
-        self.persistent_load = lambda *_: None # torch
-        self.find_class = partial(UnpickleInspector.find_class, self, result)
+        self.persistent_load = lambda *_: None # torch loads tensor values with persistent load, not needed when inspecting
+        self.find_class = partial(UnpickleInspector.find_class, self, result) # torch subclasses passed-in unpickler with different find_class
         result.structure = super().load()
         return result
 
@@ -135,9 +138,16 @@ class UnpickleControlled(UnpickleBase):
                 raise BlockedException(full_name)
             else:
                 return UnpickleInspector.find_class(self, result, module, name)
-        self._print(full_name)
+        self._print('import:', full_name)
         result.classes.append(full_name)
-        return super().find_class(module, name)
+        if self.config.ignore_missing_imports:
+            try:
+                super().find_class(module, name)
+            except ImportError as e:
+                self._print('ignore:', e)
+                return None
+        else:
+            return super().find_class(module, name)
 
     def load(self):
         result = InspectorResult()
