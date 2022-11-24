@@ -15,6 +15,7 @@
 
 import io
 import zipfile
+from enum import Enum
 from pickle_inspector import (
         is_pickle,
         UnpickleConfig,
@@ -23,6 +24,12 @@ from pickle_inspector import (
         BlockedException,
         importlists
 )
+
+
+class ScanResult(Enum):
+    PASSED = 0
+    BLOCKED = 1
+    FAILED = 2
 
 
 def scan(path, pickle_module):
@@ -39,10 +46,10 @@ def scan(path, pickle_module):
         with open(path, 'rb') as f:
             if is_pickle(f):
                 data = { path: io.BytesIO(f.read()) }
-    passed = True
+    passed = ScanResult.PASSED
     if len(data) < 1:
         print("No valid pickle found!")
-        passed = False
+        passed = ScanResult.FAILED
     else:
         for k in data:
             print(f"Scanning: {k}")
@@ -50,8 +57,11 @@ def scan(path, pickle_module):
                 pickle_module.Unpickler(data[k]).load()
             except BlockedException as e:
                 print(e)
-                passed = False
-    print("Scan for", path, "PASSED ✅" if passed else "FAILED! ⚠️")
+                passed = ScanResult.BLOCKED
+    if passed is ScanResult.PASSED:
+        print(f"Scan for {path} PASSED ✅")
+    else:
+        print(f"Scan for {path} FAILED ⚠️")
     return passed
 
 
@@ -121,14 +131,15 @@ def main(args):
         blacklist = blacklist
     )
     stubPickle = PickleModule(UnpickleInspector, conf)
-    passed = True
+    passed = ScanResult.PASSED
     for p in args.input:
-        if not scan(p, stubPickle):
-            passed = False
+        result = scan(p, stubPickle)
+        if result is not ScanResult.PASSED:
+            passed = result
     return passed
 
 
 if __name__ == '__main__':
     import sys
-    sys.exit(0) if main(sys.argv[1:]) else sys.exit(1)
+    sys.exit(main(sys.argv[1:]).value)
 
