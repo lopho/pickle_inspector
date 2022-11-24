@@ -28,5 +28,17 @@ stable_diffusion_v1 = [
 ]
 
 
-whitelists = { 'stable_diffusion_v1': stable_diffusion_v1 }
+stable_diffusion_v2 = [
+        'collections.OrderedDict',
+        'torch._utils._rebuild_tensor_v2',
+        'torch.HalfStorage',
+        'torch.FloatStorage',
+        'torch.IntStorage'
+]
+
+
+whitelists = {
+        'stable_diffusion_v1': stable_diffusion_v1,
+        'stable_diffusion_v2': stable_diffusion_v2
+}
 

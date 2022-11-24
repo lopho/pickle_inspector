@@ -136,10 +136,10 @@ conf.whitelist = ['torch.FloatStorage']
 If the blacklist is empty and the whitelist contains items, \
 everything except items in the whitelist will be blocked.
 
-## Safe whitelist for stable diffusion v1
-A premade whitelist for stable diffusion v1 is available in this project.
+## Safe whitelist for stable diffusion
+A premade whitelist for stable diffusion v1 and v2 is available in this project.
 
-Example: Scan a stable diffusion checkpoint
+Example: Scan a stable diffusion v1 checkpoint
 ```py
 import torch
 from pickle_inspector import UnpickleConfig, PickleModule, UnpickleInspector, importlists

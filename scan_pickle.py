@@ -74,6 +74,7 @@ def main(args):
     parser.add_argument(
         '-p', '--preset',
         type = str,
+        nargs = '+',
         choices = importlists.whitelists.keys(),
         help = "a whitelist preset to use: stable_diffusion_v1"
     )
@@ -99,11 +100,15 @@ def main(args):
     whitelist = []
     blacklist = []
     if args.preset is not None:
-        whitelist = importlists.whitelists[args.preset]
+        for preset in args.preset:
+            print(f"Using preset: {preset}")
+            whitelist += importlists.whitelists[preset]
     if args.whitelist is not None:
         whitelist += args.whitelist
     if args.blacklist is not None:
         blacklist += args.blacklist
+    blacklist = list(set(blacklist))
+    whitelist = list(set(whitelist))
     print(f"Scanning file(s): {args.input}")
     if len(whitelist) > 0:
         print(f"Using white list: {whitelist}")
