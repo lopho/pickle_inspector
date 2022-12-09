@@ -1,6 +1,22 @@
 # pickle_inspector 🥒🔬
 Check what is in the pickle before eating it.
 
+1. [About](#about)
+1. [Command line usage](#scanning-pickles-via-command-line)
+1. [Library usage](#inspecting)
+1. [Controlled unpickling](#controlled-unpickling)
+1. [Black- and whitelists](#blacklist--whitelist)
+1. [Acknowledgements](#acknowledgements)
+
+## About
+
+- Trace calls and imports that would occur if a pickle had been loaded
+- Flat but detailed call graphs
+- Load malicious pickles by skipping blacklisted items
+- Library and script usage
+- Combination of black and whitelists for fine grained control
+- Can be used with pytorchs load function
+
 It works on any type of pickle, but was made with `torch` in mind.
 
 NOTE:
@@ -15,10 +31,10 @@ python scan_pickle.py -f exec -i pickled.pkl
 ```
 ```
 > Using blacklist: exec
-> Scanning file(s): ['pickle_injector/pickled.pkl']
+> Scanning file(s): ['pickled.pkl']
 > Using black list: ['__builtin__.breakpoint', '__builtin__.open', 'requests.*', 'builtins.open', '__builtin__.compile', 'socket.*', 'builtins.breakpoint', 'os.*', 'nt.*', 'builtins.eval', 'webbrowser.*', '__builtin__.eval', 'builtins.exec', 'posix.*', '__builtin__.exec', '__builtin__.getattr', 'builtins.getattrsubprocess.*', 'builtins.compile', 'aiohttp.*', 'httplib.*', 'sys.*']
-> Reading pickle_injector/pickled.pkl
-> Scanning: pickle_injector/pickled.pkl
+> Reading pickled.pkl
+> Scanning: pickled.pkl
 > found: __builtin__.exec
 > found: zlib.decompress
 >
@@ -129,7 +145,12 @@ config.whitelist = [
         '_codecs.encode'
 ]
 result = torch.load('model.ckpt', pickle_module = PickleModule(UnpickleControlled, config))
+
+# Use the state_dict as usual
 state_dict = result.structure
+# ...
+
+# print import results
 for c in result.imports:
     print(c)
 ```
@@ -176,6 +197,14 @@ torch.load('sd-v1-4.ckpt', pickle_module=PickleModule(UnpickleInspector, conf))
 ```
 
 Tested with python 3.9 and torch 1.12.1
+
+---
+
+## Acknowledgements
+
+- [pickle_injector](https://github.com/coldwaterq/pickle_injector) where [coldwaterq](https://github.com/coldwaterq) describes an easy way to inject malicious code into pickle files
+- [picklescan](https://github.com/mmaitre314/picklescan) by [mmaitre314](https://github.com/mmaitre314) as an alternative approach to pickle scanning
+
 
 ---
 
