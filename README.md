@@ -9,10 +9,31 @@ until this is fixed, stick to 1.12.x or older.
 
 ## Scanning pickles via command line
 **tl;dr** just let me scan my pickles.
+Using a preset blacklist for arbitrary code execution
 ```sh
-python3 scan_pickle.py --preset stable_diffusion_v1 --in sus.ckpt
+python scan_pickle.py -f exec -i pickled.pkl
 ```
 ```
+> Using blacklist: exec
+> Scanning file(s): ['pickle_injector/pickled.pkl']
+> Using black list: ['__builtin__.breakpoint', '__builtin__.open', 'requests.*', 'builtins.open', '__builtin__.compile', 'socket.*', 'builtins.breakpoint', 'os.*', 'nt.*', 'builtins.eval', 'webbrowser.*', '__builtin__.eval', 'builtins.exec', 'posix.*', '__builtin__.exec', '__builtin__.getattr', 'builtins.getattrsubprocess.*', 'builtins.compile', 'aiohttp.*', 'httplib.*', 'sys.*']
+> Reading pickle_injector/pickled.pkl
+> Scanning: pickle_injector/pickled.pkl
+> found: __builtin__.exec
+> found: zlib.decompress
+>
+> Found blacklisted items:
+>
+>   __builtin__.exec.__call__((zlib.decompress((b'x\xda5\xcd]\n\xc3 \x10\x04\xe0\xf7\x9cb\xd9\x17\x15$\x07\x08x\x87\xde@$\xac\xe9R\xff\xd0\r\t\x94\xde\xbdB\xe9<}\x0c\x0c\x13{\xcd\x90\xcf$\xdcz\xddi\x0c.\x07pn\xb5\x0b<~\xcd\xd2\xc0\xfd\xad%\xf4\x83\xc4\xd1M\xbb\x85\xe9\xe14"^,O\xa8\x8d\x8aV\xa9\xa6UnQ\x16\xd4\xa5\x0c\x84\x01q[`\xa6u.\xa21\x9e\xfb\x0b-DN\xe4\xa2\x99[\xfbF\xefK\xc8\xe4=n\x939p\x99\xfcX0fi\xeb\x98\x8f\xa2\xcd\x17\x1d%6\xbc',), {}),), {})
+>
+> Scan for pickled.pkl FAILED ⚠️
+```
+Using a preset whitelist for a stable diffusion checkpoint
+```sh
+python scan_pickle.py --preset stable_diffusion_v1 --in sus.ckpt
+```
+```
+> Using whitelist: stable_diffusion_v1
 > Scanning file(s): ['sus.ckpt']
 > Using white list: ['collections.OrderedDict', 'torch._utils._rebuild_tensor_v2', 'torch.HalfStorage', 'torch.FloatStorage', 'torch.IntStorage', 'torch.LongStorage', 'pytorch_lightning.callbacks.model_checkpoint.ModelCheckpoint', 'numpy.core.multiarray.scalar', 'numpy.dtype', '_codecs.encode']
 > Reading sus.ckpt
@@ -27,18 +48,25 @@ python3 scan_pickle.py --preset stable_diffusion_v1 --in sus.ckpt
 > found: numpy.core.multiarray.scalar
 > found: numpy.dtype
 > found: _codecs.encode
+>
 > Scan for sus.ckpt PASSED ✅
 ```
 ### Script usage
 ```
-usage: Scan pickles [-h] -i INPUT [INPUT ...] [-p {stable_diffusion_v1}] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
+usage: scan_pickle.py [-h] -i INPUT [INPUT ...]
+                      [-p {stable_diffusion_v1,stable_diffusion_v2} [{stable_diffusion_v1,stable_diffusion_v2} ...]]
+                      [-f {exec} [{exec} ...]] [-w WHITELIST [WHITELIST ...]] [-b BLACKLIST [BLACKLIST ...]]
+
+Scan pickles
 
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT [INPUT ...], --in INPUT [INPUT ...]
                         path to a pickle(s) or zip(s) containing pickles
-  -p {stable_diffusion_v1}, --preset {stable_diffusion_v1}
-                        a whitelist preset to use: stable_diffusion_v1
+  -p {stable_diffusion_v1,stable_diffusion_v2} [{stable_diffusion_v1,stable_diffusion_v2} ...], --preset {stable_diffusion_v1,stable_diffusion_v2} [{stable_diffusion_v1,stable_diffusion_v2} ...]
+                        a whitelist preset to use
+  -f {exec} [{exec} ...], --preset_blacklist {exec} [{exec} ...]
+                        a blacklist preset to use
   -w WHITELIST [WHITELIST ...], --whitelist WHITELIST [WHITELIST ...]
                         whitelist of modules and functions to allow
   -b BLACKLIST [BLACKLIST ...], --blacklist BLACKLIST [BLACKLIST ...]

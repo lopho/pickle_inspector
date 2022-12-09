@@ -33,6 +33,7 @@ class ScanResult(Enum):
 
 
 def scan(path, pickle_module):
+    flagged = []
     print(f"Reading {path}")
     data = dict()
     if zipfile.is_zipfile(path):
@@ -54,14 +55,20 @@ def scan(path, pickle_module):
         for k in data:
             print(f"Scanning: {k}")
             try:
-                pickle_module.Unpickler(data[k]).load()
+                r = pickle_module.Unpickler(data[k]).load()
+                if len(r.flagged) > 0:
+                    passed = ScanResult.BLOCKED
+                    flagged += r.flagged
             except BlockedException as e:
                 print(e)
                 passed = ScanResult.BLOCKED
     if passed is ScanResult.PASSED:
-        print(f"Scan for {path} PASSED ✅")
+        print(f"\nScan for {path} PASSED ✅")
     else:
-        print(f"Scan for {path} FAILED ⚠️")
+        print(f"\nFound blacklisted items:\n")
+        for v in flagged:
+            print(f'  {v}')
+        print(f"\nScan for {path} FAILED ⚠️")
     return passed
 
 
@@ -84,9 +91,18 @@ def main(args):
     parser.add_argument(
         '-p', '--preset',
         type = str,
+        default = [],
         nargs = '+',
         choices = importlists.whitelists.keys(),
-        help = "a whitelist preset to use: stable_diffusion_v1"
+        help = "a whitelist preset to use"
+    )
+    parser.add_argument(
+        '-f', '--preset_blacklist',
+        type = str,
+        default = [],
+        nargs = '+',
+        choices = importlists.blacklists.keys(),
+        help = "a blacklist preset to use"
     )
     parser.add_argument(
         '-w', '--whitelist',
@@ -109,10 +125,12 @@ def main(args):
     args = parser.parse_args(args)
     whitelist = []
     blacklist = []
-    if args.preset is not None:
-        for preset in args.preset:
-            print(f"Using preset: {preset}")
-            whitelist += importlists.whitelists[preset]
+    for preset in args.preset:
+        print(f"Using preset: {preset}")
+        whitelist += importlists.whitelists[preset]
+    for preset in args.preset_blacklist:
+        print(f"Using blacklist: {preset}")
+        blacklist += importlists.blacklists[preset]
     if args.whitelist is not None:
         whitelist += args.whitelist
     if args.blacklist is not None:
@@ -125,7 +143,7 @@ def main(args):
     if len(blacklist) > 0:
         print(f"Using black list: {blacklist}")
     conf = UnpickleConfig(
-        strict = True,
+        strict = False,
         verbose = True,
         whitelist = whitelist,
         blacklist = blacklist

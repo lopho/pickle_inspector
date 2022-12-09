@@ -55,6 +55,7 @@ class InspectorResult:
     def __init__(self):
         self.imports = []
         self.calls = []
+        self.flagged = []
         self.structure = {}
 
 
@@ -74,7 +75,7 @@ class UnpickleConfig:
 
 
 class StubMeta:
-    def __init__(self, module, name, result, config):
+    def __init__(self, module, name, result, config, flagged = False):
         self.module = module
         self.name = name
         self.full_name = f'{module}.{name}'
@@ -82,6 +83,7 @@ class StubMeta:
         self.kwargs = {}
         self.config = config
         self.result = result
+        self.flagged = flagged
 
     def _call_tracer(self, attr, *args, **kwargs):
         if attr not in self.args:
@@ -89,7 +91,10 @@ class StubMeta:
             self.kwargs[attr] = []
         self.args[attr].append(args)
         self.kwargs[attr].append(kwargs)
-        self.result.calls.append(f'{self.full_name}.{attr}({args}, {kwargs})')
+        callstr = f'{self.full_name}.{attr}({args}, {kwargs})'
+        self.result.calls.append(callstr)
+        if self.flagged:
+            self.result.flagged.append(callstr)
 
     def __repr__(self):
         if '__call__' in self.args and len(self.args['__call__']) > 0:
@@ -121,12 +126,15 @@ class UnpickleInspector(UnpickleBase):
         self._print(f'found: {full_name}')
         result.imports.append(full_name)
         config = self.config
-        if self.config.strict:
-            in_blacklist = _check_list(full_name, self.config.blacklist)
-            in_whitelist = _check_list(full_name, self.config.whitelist)
-            if (in_blacklist and not in_whitelist) or (len(self.config.blacklist) < 1 and len(self.config.whitelist) > 0 and not in_whitelist):
+        flagged = False
+        in_blacklist = _check_list(full_name, self.config.blacklist)
+        in_whitelist = _check_list(full_name, self.config.whitelist)
+        if (in_blacklist and not in_whitelist) or (len(self.config.blacklist) < 1 and len(self.config.whitelist) > 0 and not in_whitelist):
+            if self.config.strict:
                 raise BlockedException(full_name)
-        return StubMeta(module, name, result, config)
+            else:
+                flagged = True
+        return StubMeta(module, name, result, config, flagged)
 
     def load(self):
         result = InspectorResult()
@@ -166,6 +174,7 @@ class UnpickleControlled(UnpickleBase):
         result = InspectorResult()
         self.find_class = partial(UnpickleControlled.find_class, self, result)
         result.structure = super().load()
+        result.flags = getattr(self, 'config').flags
         return result
 
 
