@@ -36,14 +36,15 @@ def _is_pickle(bytes_like):
     opcodes = []
     try:
         for i,o in enumerate(ops):
-            if len(o) < 1:
-                continue
-            if i == 0 and o[0].name != 'PROTO':
-                return False
+            if i == 0:
+                if o[0].name != 'PROTO':
+                    return False
+                if o[1] > 5:
+                    return False
             opcodes.append(o[0])
     except ValueError:
         return False
-    if len(opcodes) < 1:
+    if len(opcodes) < 2:
         return False
     if opcodes[-1].name == 'STOP':
         return True
