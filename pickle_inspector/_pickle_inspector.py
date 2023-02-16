@@ -163,7 +163,7 @@ class UnpickleControlled(UnpickleBase):
         result.imports.append(full_name)
         if self.config.ignore_missing_imports:
             try:
-                super().find_class(module, name)
+                return super().find_class(module, name)
             except ImportError as e:
                 self._print('ignore:', e)
                 return None
